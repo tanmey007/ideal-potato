@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connections – Birthday Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    .instructions {
+      font-size: 0.85rem;
+      color: var(--mid);
+      text-align: center;
+      max-width: 400px;
+    }
+    .lives {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--mid);
+    }
+    .life-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--dark);
+      transition: background 0.3s;
+    }
+    .life-dot.lost { background: var(--warm); }
+
+    .solved-list {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .solved-card {
+      border-radius: 8px;
+      padding: 14px 18px;
+      text-align: center;
+      animation: slideIn 0.4s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .solved-card .cat-name {
+      font-family: var(--ff-display);
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 2px;
+    }
+    .solved-card .cat-words {
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .word-btn {
+      background: var(--warm);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 14px 6px;
+      font-family: var(--ff-body);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--dark);
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s, transform 0.1s;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .word-btn.selected {
+      background: var(--mid);
+      color: #fff;
+      border-color: var(--dark);
+      transform: scale(1.05);
+    }
+    .word-btn.wrong {
+      animation: wrongShake 0.5s ease;
+    }
+    @keyframes wrongShake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-5px); }
+      40%     { transform: translateX(5px); }
+      60%     { transform: translateX(-4px); }
+      80%     { transform: translateX(4px); }
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--mid);
+      color: var(--dark);
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-family: var(--ff-body);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+    .btn-outline:hover { background: var(--dark); color: var(--cream); border-color: var(--dark); }
+
+    @media (max-width: 400px) {
+      .word-btn { font-size: 0.72rem; padding: 12px 4px; }
+    }
+  </style>
+</head>
+<body>
+<div class="game-shell">
+
+  <header class="game-header">
+    <a href="../index.html" class="back-link">← Back</a>
+    <h1>Connections</h1>
+    <div style="width:48px"></div>
+  </header>
+
+  <div class="game-body">
+    <p class="instructions">Find four groups of four. Select four words, then hit Submit.</p>
+    <p>This is about the people in your different circles.</p>
+
+    <div class="lives" id="lives"></div>
+    <div class="solved-list" id="solved"></div>
+    <div class="grid" id="grid"></div>
+
+    <div class="actions">
+      <button class="btn-outline" onclick="shuffleGrid()">Shuffle</button>
+      <button class="btn-outline" onclick="deselectAll()">Deselect All</button>
+      <button class="btn" onclick="submitGuess()">Submit</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modal-title"></h2>
+    <p id="modal-body"></p>
+    <button class="btn" onclick="document.getElementById('modal').classList.remove('show')">Close</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  ✏️  EDIT THE CATEGORIES BELOW
+//  Each group needs exactly 4 words.
+//  difficulty: 1 = easiest (yellow) → 4 = hardest (purple)
+// ════════════════════════════════════════════════
+
+const CATEGORIES = [
+  {
+    name: "Important People",           // ← category label shown on solve
+    words: ["Diya", "Tanu", "Rohan", "Aayush"], // ← 4 words/phrases
+    difficulty: 1,
+    color: "#D4A833",   // yellow
+    textColor: "#fff"
+  },
+  {
+    name: "Surname of the 'Crew' ",
+    words: ["Yellapati", "Rawat", "Melkote", "Rai"],
+    difficulty: 2,
+    color: "#5A7A52",   // green
+    textColor: "#fff"
+  },
+  {
+    name: "People whom we would like to block on teams (I know Harsimran do baar hai because he deserves a double block) ",
+    words: ["Harsimran", "Rakesh", "Yoga", "Sethi Saheb"],
+    difficulty: 3,
+    color: "#4A80B8",   // blue
+    textColor: "#fff"
+  },
+  {
+    name: "People you baby sit",
+    words: ["Palak", "Vedu ❤️", "Mita ❤️", "Pragati"],
+    difficulty: 4,
+    color: "#7B5EA7",   // purple
+    textColor: "#fff"
+  }
+];
+
+// ════════════════════════════════════════════════
+//  Game logic — no need to edit below
+// ════════════════════════════════════════════════
+
+const MAX_LIVES = 4;
+let lives = MAX_LIVES;
+let selected = [];
+let remaining = [];
+let solved = [];
+let gameOver = false;
+
+// Flatten words with category index
+CATEGORIES.forEach((cat, ci) => cat.words.forEach(w => remaining.push({ word: w, catIndex: ci })));
+shuffle(remaining);
+
+renderLives();
+renderGrid();
+
+function triggerConfetti() {
+  // Left side burst
+  confetti({
+    particleCount: 50,
+    angle: 60,
+    spread: 55,
+    origin: { x: 0, y: 0.8 }
+  });
+  // Right side burst
+  confetti({
+    particleCount: 50,
+    angle: 120,
+    spread: 55,
+    origin: { x: 1, y: 0.8 }
+  });
+}
+
+function renderLives() {
+  const el = document.getElementById('lives');
+  el.innerHTML = '<span>Mistakes remaining:</span>';
+  for (let i = 0; i < MAX_LIVES; i++) {
+    const d = document.createElement('div');
+    d.className = 'life-dot' + (i >= lives ? ' lost' : '');
+    el.appendChild(d);
+  }
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  remaining.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'word-btn' + (selected.includes(item.word) ? ' selected' : '');
+    btn.textContent = item.word;
+    btn.addEventListener('click', () => toggleSelect(item.word, btn));
+    grid.appendChild(btn);
+  });
+}
+
+function toggleSelect(word, btn) {
+  if (gameOver) return;
+  if (selected.includes(word)) {
+    selected = selected.filter(w => w !== word);
+    btn.classList.remove('selected');
+  } else {
+    if (selected.length >= 4) { showToast('Only 4 at a time!'); return; }
+    selected.push(word);
+    btn.classList.add('selected');
+  }
+}
+
+function deselectAll() { selected = []; renderGrid(); }
+
+function submitGuess() {
+  if (gameOver) return;
+  if (selected.length !== 4) { showToast('Pick exactly 4 words'); return; }
+
+  // Check which categories the selected words belong to
+  const counts = {};
+  selected.forEach(w => {
+    const item = remaining.find(r => r.word === w);
+    if (item) counts[item.catIndex] = (counts[item.catIndex] || 0) + 1;
+  });
+
+  const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const [topCat, topCount] = entries[0];
+
+  if (topCount === 4) {
+    // Correct!
+    triggerConfetti(); // Added confetti trigger here
+    const cat = CATEGORIES[topCat];
+    remaining = remaining.filter(r => !selected.includes(r.word));
+    solved.push(cat);
+    selected = [];
+    renderSolved();
+    renderGrid();
+    if (solved.length === CATEGORIES.length) {
+      gameOver = true;
+      setTimeout(() => showModal('🎉 You nailed it!', "You know yourself better than anyone 😄. Hope you had fun"), 400);
+    }
+  } else {
+    // Wrong
+    lives--;
+    renderLives();
+    if (topCount === 3) showToast('One away…');
+    else showToast('Not quite!');
+    shakeSelected();
+    selected = [];
+    setTimeout(renderGrid, 500);
+    if (lives === 0) {
+      gameOver = true;
+      setTimeout(() => {
+        const reveal = CATEGORIES.map(c => `${c.name}: ${c.words.join(', ')}`).join('\n');
+        showModal('Out of guesses 💛', `Here were the groups:\n${reveal}`);
+      }, 600);
+    }
+  }
+}
+
+function shakeSelected() {
+  document.querySelectorAll('.word-btn.selected').forEach(btn => {
+    btn.classList.add('wrong');
+    setTimeout(() => btn.classList.remove('wrong'), 500);
+  });
+}
+
+function renderSolved() {
+  const el = document.getElementById('solved');
+  el.innerHTML = '';
+  solved.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'solved-card';
+    card.style.background = cat.color;
+    card.style.color = cat.textColor;
+    card.innerHTML = `<div class="cat-name">${cat.name}</div><div class="cat-words">${cat.words.join(' · ')}</div>`;
+    el.appendChild(card);
+  });
+}
+
+function shuffleGrid() { shuffle(remaining); renderGrid(); }
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function showModal(title, body) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent  = body;
+  document.getElementById('modal').classList.add('show');
+}
+</script>
+</body>
+</html>
