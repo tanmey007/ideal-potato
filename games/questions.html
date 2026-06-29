@@ -231,10 +231,25 @@
       </div>
     </div>
   </div>
+  
+  <div id="successScreen" class="hidden">
+      <div class="progress-track">Game Complete! 🌻🌻</div>
+      <div class="flash-card">
+        <div class="card-icon">❤️</div>
+        <div class="card-title">Happy Birthday Once again</div>
+        
+        <p style="font-family: var(--ff-body); font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px; color: #1a102f; font-weight: 600;">
+           I hope you had fun playing! Thank you for simply existing and making my life so beautiful. I hope today brings you so much happiness, and that each tomorrow is even brighter than yesterday.
+        </p>
+        
+        <a href="../index.html" class="action-btn" style="text-decoration: none; display: inline-block;">Back to Game Board</a>
+      </div>
+    </div>
 
   <script>
     // Quiz core data
     const quizData = [
+		{ date: "24-03-2025", answer: "This is the day we met for the first time in person. I know we didn't really talk too much back then. To be honest, I never imagined that day how important you would become to me. But just like in Wordle, with time we would figure out place in each other's life " },
       { date: "24-03-2025", answer: "This is the day we met for the first time in person. I know we didn't really talk too much back then. To be honest, I never imagined that day how important you would become to me. But just like in Wordle, with time we would figure out place in each other's life " },
       { date: "13-05-2025", answer: "This is the day you first texted me on WhatsApp. Since that day, our Connection has only grown stronger." },
       { date: "25-06-2025", answer: "This is the day I first confessed to having feelings for you, making our friendship as complicated as Strands." },
@@ -247,6 +262,7 @@
     // View Switching Elements
     const rulesScreen = document.getElementById('rulesScreen');
     const gameplayScreen = document.getElementById('gameplayScreen');
+	const successScreen = document.getElementById('successScreen');
 
     // Gameplay UI Elements
     const progressText = document.getElementById('progressText');
@@ -267,7 +283,7 @@
         if (currentIndex < quizData.length - 1) {
           actionButton.innerText = "Next Question →";
         } else {
-          actionButton.innerText = "Finish Game 🌻";
+          actionButton.innerText = "Finish Game 🌻🌻";
         }
         isRevealed = true;
       } else {
@@ -283,8 +299,8 @@
             actionButton.innerText = "Reveal Answer";
           }, 200);
         } else {
-          alert("Happy Birthday once again, thanking you for existing and making my life better 🌻🌻");
-          window.location.href = "../index.html";
+          gameplayScreen.classList.add('hidden');
+          successScreen.classList.remove('hidden');
         }
       }
     }
