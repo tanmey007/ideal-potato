@@ -3,108 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pinpoint | Birthday Edition 🎂</title>
+  <title>Pinpoint | Aayushi's Birthday Edition 🎂</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <style>
-										  
     .pinpoint-container {
       width: 100%;
-      max-width: 480px;
+      max-width: 540px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
+      margin-top: 10px;
+      position: relative;
     }
     
-    /* Pinpoint Grid Style */
-    .pinpoint-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .clue-tile {
-      background: #fff;
-      border: 1.5px solid var(--warm);
-      border-radius: 10px;
-      min-height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 16px;
-		   
-						 
-					   
-						 
-      text-align: center;
-      font-weight: 700;
-      font-size: 1rem;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-								  
-								
-    }
-
-    /* Unrevealed tile looks like an empty mystery slot */
-    .clue-tile.locked {
-      background: var(--warm);
-      color: var(--mid);
-      border-style: dashed;
-      font-family: var(--ff-display);
-      font-size: 1.1rem;
-      opacity: 0.6;
-    }
-
-    /* Animation pop when revealed */
-    .clue-tile.revealed {
-      animation: popIn 0.35s ease-out forwards;
-      color: var(--dark);
-      border-color: var(--rust-lt);
-      box-shadow: 0 4px 12px rgba(44,26,14,0.05);
-    }
-
-    @keyframes popIn {
-      0% { transform: scale(0.95); opacity: 0.5; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .game-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .input-group {
-      display: flex;
-      gap: 8px;
-    }
-    .guess-input {
-      flex: 1;
-      padding: 14px;
-      border: 1.5px solid var(--warm);
-      border-radius: 8px;
-      font-family: var(--ff-body);
-      font-size: 1rem;
-      outline: none;
-    }
-    .guess-input:focus {
-      border-color: var(--rust-lt);
-    }
     .guess-counter {
       text-align: center;
       font-size: 0.85rem;
       color: var(--mid);
       font-weight: 700;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
+    }
+
+    /* Pinpoint Grid layout with individual gaps */
+    .pinpoint-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    
+    /* Individual clue rows styled with the Pinpoint blue colors */
+    .clue-row {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    /* Revealed state: Progressively darker blue shades */
+    .clue-row.revealed {
+      color: #1a202c;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    #row-0.revealed { background-color: #a3d2f9; border: 1px solid #82beee; }
+    #row-1.revealed { background-color: #82beee; border: 1px solid #60aae3; }
+    #row-2.revealed { background-color: #60aae3; border: 1px solid #4397db; }
+    #row-3.revealed { background-color: #4397db; border: 1px solid #2b82cb; }
+    #row-4.revealed { background-color: #2b82cb; border: 1px solid #1e6bb3; color: #ffffff; }
+
+    /* Locked state: Muted beige placeholder with a centered '?' */
+    .clue-row.locked {
+      background: #ede3d7;
+      color: #bfaea0;
+      font-family: var(--ff-display);
+      font-size: 1.2rem;
+    }
+
+    /* Answer Row styled in custom highlighted theme when game finishes */
+    .answer-row {
+      background-color: #e0f0fe;
+      border: 1.5px solid #bae0fd;
+      color: #1e40af;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      border-radius: 10px;
+      margin-top: 4px;
+    }
+    
+    /* Checkmark circle graphic styling */
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #1e40af;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Controls Alignment matching user image layout exactly */
+    .game-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+    
+    .guess-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1.5px solid var(--warm);
+      border-radius: 8px;
+      font-family: var(--ff-body);
+      font-size: 1rem;
+      outline: none;
+      background: #ffffff;
+    }
+    
+    .guess-input:focus {
+      border-color: var(--light);
+    }
+
+    .btn {
+      padding: 14px 28px;
+    }
+    
+    #next-clue-btn {
+      background: var(--mid);
+      width: 100%;
+      padding: 14px;
+    }
+    #next-clue-btn:hover {
+      background: var(--dark);
+    }
+
+    /* Confetti Canvas Container */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
     }
   </style>
 </head>
 <body class="game-shell">
 
+  <!-- Confetti Canvas Area -->
+  <canvas id="confetti-canvas"></canvas>
+
   <header class="game-header">
     <a href="../index.html" class="back-link">← Back</a>
-    <h1>Pinpoint</h1>
+    <h1>Pinpoint #1406</h1>
     <div style="width: 45px;"></div>
   </header>
 
@@ -112,56 +164,55 @@
     <div class="pinpoint-container">
       
       <div class="guess-counter" id="guess-counter">
-        Clues Revealed: 1 / 5
+        CLUES REVEALED: 1 / 5
       </div>
 
-      <!-- The 5 Visual Tiles -->
+      <!-- Individual Item Grid Structure -->
       <div class="pinpoint-grid" id="pinpoint-grid">
-        <div class="clue-tile locked" id="tile-0">?</div>
-        <div class="clue-tile locked" id="tile-1">?</div>
-        <div class="clue-tile locked" id="tile-2">?</div>
-        <div class="clue-tile locked" id="tile-3">?</div>
-        <div class="clue-tile locked" id="tile-4">?</div>
+        <div class="clue-row locked" id="row-0">?</div>
+        <div class="clue-row locked" id="row-1">?</div>
+        <div class="clue-row locked" id="row-2">?</div>
+        <div class="clue-row locked" id="row-3">?</div>
+        <div class="clue-row locked" id="row-4">?</div>
+        <div id="answer-box"></div>
       </div>
 
-      <div class="game-controls">
+      <!-- Action Elements Layer -->
+      <div class="game-controls" id="game-controls">
         <div class="input-group">
           <input type="text" id="guess-input" class="guess-input" placeholder="Type your guess..." autocomplete="off">
           <button class="btn" id="submit-btn">Guess</button>
         </div>
-        <button class="btn" id="next-clue-btn" style="background: var(--mid); padding: 10px;">Give me another clue</button>
+        <button class="btn" id="next-clue-btn">Give me another clue</button>
       </div>
 
     </div>
   </main>
 
-  <!-- Notification Toast -->
+  <!-- Message Toast Component -->
   <div class="toast" id="toast">Incorrect guess! Try again.</div>
 
-  <!-- End Game Overlay -->
+  <!-- Modal Screen (Without Play Again Loop) -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
       <h2 id="modal-title">Result</h2>
       <p id="modal-desc"></p>
-      <button class="btn" onclick="location.reload()">Play Again</button>
+      <button class="btn" onclick="document.getElementById('modal-overlay').classList.remove('show')">View Results</button>
     </div>
   </div>
 
   <script>
-    // --- CONFIGURE YOUR QUESTIONS & VALID ANSWERS HERE ---
-																			  
+    // --- CONFIDENTIAL GAME ANSWERS DATA CONFIGURATION ---
     const gameData = {
-      // The principal long answer to show in descriptions when winning/losing
-      displayAnswer: "People jisne baat karne ke liye tanmey ka phone disconnect kiya gya hai",
-      
-      // All versions she could enter that you want to instantly accept
+      displayAnswer: "People jisne baat karne ke liye Tanmey ka phone disconnect kiya gya hai Crying in corner 😭",
       acceptableAnswers: [
-        "Disconnect Tanmey call",
-        "Ignore Tanmey"
+        "disconnect tanmey call",
+        "ignore tanmey",
+        "disconnect tanmey",
+        "tanmey call"
       ],
-      
       clues: [
-        "Aastiva",
+        "Astitva",
         "Ashutosh",
         "Pragati",
         "Rakesh",
@@ -172,7 +223,6 @@
     let currentClueIndex = 0;
     const maxClues = gameData.clues.length;
 
-														  
     const guessInput = document.getElementById('guess-input');
     const submitBtn = document.getElementById('submit-btn');
     const nextClueBtn = document.getElementById('next-clue-btn');
@@ -181,29 +231,25 @@
     const modalOverlay = document.getElementById('modal-overlay');
     const modalTitle = document.getElementById('modal-title');
     const modalDesc = document.getElementById('modal-desc');
+    const answerBox = document.getElementById('answer-box');
+    const gameControls = document.getElementById('game-controls');
 
-								
     function initGame() {
-      // Reveal first clue immediately
       revealNextClue();
     }
 
     function revealNextClue() {
       if (currentClueIndex < maxClues) {
-        const currentTile = document.getElementById(`tile-${currentClueIndex}`);
-        if (currentTile) {
-          currentTile.classList.remove('locked');
-          currentTile.classList.add('revealed');
-          currentTile.innerText = gameData.clues[currentClueIndex];
+        const currentRow = document.getElementById(`row-${currentClueIndex}`);
+        if (currentRow) {
+          currentRow.classList.remove('locked');
+          currentRow.classList.add('revealed');
+          currentRow.innerText = gameData.clues[currentClueIndex];
         }
-		
-											   
-															   
 
         currentClueIndex++;
         updateCounter();
 
-        // Hide button if no more clues can be explicitly given
         if (currentClueIndex === maxClues) {
           nextClueBtn.style.display = 'none';
         }
@@ -211,7 +257,7 @@
     }
 
     function updateCounter() {
-      guessCounter.innerText = `Clues Revealed: ${currentClueIndex} / ${maxClues}`;
+      guessCounter.innerText = `CLUES REVEALED: ${currentClueIndex} / ${maxClues}`;
     }
 
     function showToast(message) {
@@ -220,43 +266,134 @@
       setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
+    function revealFinalAnswer(won) {
+      // Create the blue check badge row under the clues
+      answerBox.innerHTML = `
+        <div class="answer-row">
+          <svg class="check-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="#1e40af" stroke-width="2"/>
+            <path d="M8 12.5l2.5 2.5 5-5" stroke="#1e40af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>${gameData.displayAnswer}</span>
+        </div>
+      `;
+
+      // Instantly pop open any remaining unrevealed boxes
+      while (currentClueIndex < maxClues) {
+        revealNextClue();
+      }
+
+      // Turn off active interaction elements 
+      gameControls.style.display = 'none';
+
+      if (won) {
+        modalTitle.innerText = "You Nailed It! 🎉";
+        modalDesc.innerText = `It was difficult!".`;
+        startConfetti();
+      } else {
+        modalTitle.innerText = "Revealed! 👀";
+        modalDesc.innerText = `Sorry had to make it difficult.`;
+      }
+      
+      // Delay modal slightly so she can appreciate the confetti & board reveal
+      setTimeout(() => {
+        modalOverlay.classList.add('show');
+      }, 400);
+    }
+
     function handleGuess() {
       const userGuess = guessInput.value.trim().toLowerCase();
       if (!userGuess) return;
 
-      // Check input against list of matches
       const isCorrect = gameData.acceptableAnswers.some(ans => ans.trim().toLowerCase() === userGuess);
 
       if (isCorrect) {
-        modalTitle.innerText = "You Nailed It! 🎉";
-        modalDesc.innerText = `Exactly! The answer was "${gameData.displayAnswer}". Caught it on clue ${currentClueIndex}/${maxClues}!`;
-        modalOverlay.classList.add('show');
+        revealFinalAnswer(true);
       } else {
-					  
         guessInput.value = '';
-        
         if (currentClueIndex < maxClues) {
-          showToast("Wrong guess! Revealing next clue...");
+          showToast("Not quite! Revealing next clue...");
           revealNextClue();
         } else {
-          // Final guess failure state
-          modalTitle.innerText = "So close! 💔";
-          modalDesc.innerText = `Aap guess nahi kar paaye. Real answer was: "${gameData.displayAnswer}".`;
-          modalOverlay.classList.add('show');
+          revealFinalAnswer(false);
         }
       }
     }
 
-    // Interactive Action Listeners
+    // --- Native Canvas Confetti Animation Engine ---
+    function startConfetti() {
+      const canvas = document.getElementById("confetti-canvas");
+      const ctx = canvas.getContext("2d");
+      
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      const colors = ['#a3d2f9', '#60aae3', '#2b82cb', '#C1440E', '#E8896A', '#D4A833', '#5A7A52'];
+      const particles = [];
+      
+      for (let i = 0; i < 150; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * canvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+          tiltAngle: 0
+        });
+      }
+      
+      let animationFrameId;
+      let duration = 0;
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach((p, index) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - index / 3) * 15;
+          
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          ctx.stroke();
+          
+          // Loop particles back to top if they go off screen
+          if (p.y > canvas.height) {
+            p.x = Math.random() * canvas.width;
+            p.y = -20;
+          }
+        });
+        
+        duration++;
+        // Run animation for roughly 4-5 seconds
+        if (duration < 250) {
+          animationFrameId = requestAnimationFrame(draw);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          cancelAnimationFrame(animationFrameId);
+        }
+      }
+      
+      draw();
+      
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }
+
     submitBtn.addEventListener('click', handleGuess);
     nextClueBtn.addEventListener('click', revealNextClue);
-					   
-	   
     guessInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') handleGuess();
     });
 
-						 
     initGame();
   </script>
 </body>

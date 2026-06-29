@@ -3,106 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Strands – Birthday Games</title>
+  <title>Strands | Aayushi's Birthday Edition 🎂</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css" />
-  <style>
-    .theme-box {
-      background: var(--dark);
-      color: var(--cream);
-      border-radius: 10px;
-      padding: 12px 24px;
-      text-align: center;
-      font-family: var(--ff-display);
-      font-size: 1.1rem;
-      font-style: italic;
-    }
-    .sub-theme { font-size: 0.75rem; font-style: normal; opacity: 0.6; font-family: var(--ff-body); margin-top: 2px; }
-
-    .strands-grid {
-      display: grid;
-      gap: 5px;
-      user-select: none;
-      touch-action: none;
-    }
-    .s-cell {
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: var(--warm);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--ff-display);
-      font-weight: 700;
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      color: var(--dark);
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, transform 0.1s;
-      position: relative;
-    }
-    .s-cell.selecting { background: var(--mid); color: #fff; transform: scale(1.1); }
-    .s-cell.found-theme { background: var(--yellow); color: #fff; }
-    .s-cell.found-word  { background: var(--green);  color: #fff; }
-    .s-cell.spangram    { background: var(--rust);   color: #fff; }
-
-    .found-words {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      max-width: 360px;
-    }
-    .found-tag {
-      background: var(--green);
-      color: #fff;
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      animation: popIn 0.2s ease;
-    }
-    .found-tag.spangram { background: var(--rust); }
-    @keyframes popIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to   { transform: scale(1);   opacity: 1; }
-    }
-
-    .hint-counter {
-      font-size: 0.82rem;
-      color: var(--mid);
-      text-align: center;
-    }
-    .hint-counter span { font-weight: 700; color: var(--dark); }
-
-    @media (max-width: 400px) {
-      .s-cell { width: 44px; height: 44px; font-size: 0.95rem; }
-    }
-  </style>
+  
+  <!-- Link to your newly created stylesheet -->
+  <link rel="stylesheet" href="../css/strands.css" />
+  
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 <div class="game-shell">
 
   <header class="game-header">
     <a href="../index.html" class="back-link">← Back</a>
-    <h1>Strands</h1>
+    <h1>Strands #2506</h1>
     <div style="width:48px"></div>
   </header>
 
   <div class="game-body">
 
-    <!-- ✏️ EDIT the theme text below -->
     <div class="theme-box">
-      "[Your theme title here]"
-      <div class="sub-theme">Find all the hidden words · The spangram spans the grid</div>
-    </div>
+  <div class="theme-eyebrow">TODAY'S THEME</div>
+  <div class="theme-title">"Aayushi's Obsession!"</div>
+</div>
+	
+	<div class="word-counter" id="word-counter">0 of 6 theme words found.</div>
 
     <div class="strands-grid" id="strands-grid"></div>
 
     <div class="hint-counter">
       Hints available: <span id="hint-count">0</span>
-      <button class="btn-outline" style="margin-left:10px;padding:6px 14px;font-size:0.8rem;" onclick="useHint()">Use Hint</button>
+      <button class="btn-outline" onclick="useHint()">Use Hint</button>
     </div>
 
     <div class="found-words" id="found-words"></div>
@@ -121,78 +53,59 @@
 </div>
 
 <script>
-// ════════════════════════════════════════════════
-//  ✏️  HOW TO FILL IN YOUR STRANDS PUZZLE
-//
-//  1. Fill the GRID below — 8 columns × 6 rows of letters.
-//     The letters you place will hide the words in WORDS.
-//     Each word must be traceable as a connected path
-//     (each letter touching the next horizontally, vertically,
-//     or diagonally). The SPANGRAM must touch both sides.
-//
-//  2. For each word, list the (row, col) path in WORD_PATHS.
-//     Rows and cols are 0-indexed from top-left.
-//
-//  TIP: Plan on paper first — it's like a word search but
-//  the path can snake in any direction.
-//
-//  The example below has a placeholder puzzle you can replace.
-// ════════════════════════════════════════════════
-
 const GRID = [
-  // 8 letters per row, 6 rows
-  // ✏️ Replace these with your letters
-  ['S','U','N','F','L','O','W','E'],
-  ['M','I','L','K','A','R','E','R'],
-  ['E','S','T','I','E','F','N','I'],
-  ['C','H','A','I','L','A','D','E'],
-  ['S','P','R','N','G','S','E','N'],
-  ['E','L','I','O','N','Y','R','D'],
+  ['P','L','U','S','H','I','E','S'], // Row 0: PLUSHIES (Straight across)
+  ['T','A','N','U','J','A','V','I'], // Row 1: TANUJA + VIRDAS start
+  ['A','S','T','I','T','V','D','R'], // Row 2: ASTITVA + VIRDAS continuation
+  ['T','A','Y','L','O','A','A','S'], // Row 3: TAYLO... + ...A (ASTITVA) + ...AS (VIRDAS)
+  ['W','O','L','F','R','S','W','I'], // Row 4: SUNFLOWERS left / TAYLORSWIFT right
+  ['E','R','S','N','U','S','T','F'], // Row 5: SUNFLOWERS bottom / TAYLORSWIFT finish
 ];
 
-// ✏️ Words hidden in the grid (all caps, no spaces for multi-word — or use space)
-// The SPANGRAM is the word that spans the whole grid (touches both left and right side, or top and bottom)
 const WORDS = [
-  { word: "SUMMER",   spangram: false },  // ← regular word
-  { word: "SPRING",   spangram: false },
-  { word: "FRIEND",   spangram: false },
-  { word: "SMILE",    spangram: false },
-  { word: "SUNSHINE", spangram: true  },  // ← this is the spangram
+  { word: "PLUSHIES",    spangram: false },
+  { word: "TANUJA",      spangram: false },
+  { word: "VIRDAS",      spangram: false },
+  { word: "ASTITVA",     spangram: false },
+  { word: "SUNFLOWERS",  spangram: false },
+  { word: "TAYLORSWIFT", spangram: true  },
 ];
 
-// ✏️ Paths for each word — list of [row, col] for each letter
-// Order must match WORDS array above
 const WORD_PATHS = [
-  // SUMMER: S(0,0) U(0,1) M(1,0) M(2,0) E(2,4 — wait, plan your own grid)
-  // These are PLACEHOLDER paths — they won't work until you set your own grid
-  [[0,0],[0,1],[1,0],[2,0],[1,2],[0,2]],   // SUMMER — placeholder
-  [[4,0],[4,2],[4,1],[3,3],[4,4],[3,5]],   // SPRING — placeholder
-  [[2,6],[3,6],[4,5],[3,4],[2,3],[2,2]],   // FRIEND — placeholder
-  [[1,1],[2,1],[3,2],[4,1],[3,1]],          // SMILE  — placeholder
-  [[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7]], // SUNSHINE — placeholder spangram
+  // 1. PLUSHIES (8 letters)
+  [[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7]],   
+
+  // 2. TANUJA (6 letters)
+  [[1,0],[1,1],[1,2],[1,3],[1,4],[1,5]],               
+
+  // 3. VIRDAS (6 letters)
+  [[1,6],[1,7],[2,7],[2,6],[3,6],[3,7]],               
+
+  // 4. ASTITVA (7 letters)
+  [[2,0],[2,1],[2,2],[2,3],[2,4],[2,5],[3,5]],         
+
+  // 5. SUNFLOWERS (10 letters)
+  // S[5,5] -> U[5,4] -> N[5,3] -> F[4,3] -> L[4,2] -> O[4,1] -> W[4,0] -> E[5,0] -> R[5,1] -> S[5,2]
+  [[5,5],[5,4],[5,3],[4,3],[4,2],[4,1],[4,0],[5,0],[5,1],[5,2]], 
+
+  // 6. TAYLORSWIFT (11 letters)
+  // T[3,0] -> A[3,1] -> Y[3,2] -> L[3,3] -> O[3,4] -> R[4,4] -> S[4,5] -> W[4,6] -> I[4,7] -> F[5,7] -> T[5,6]
+  [[3,0],[3,1],[3,2],[3,3],[3,4],[4,4],[4,5],[4,6],[4,7],[5,7],[5,6]], 
 ];
-
-// ════════════════════════════════════════════════
-//  Game logic — no need to edit below
-// ════════════════════════════════════════════════
-
 const ROWS = GRID.length, COLS = GRID[0].length;
 let selecting = false;
 let currentPath = [];
 let foundWords = new Set();
-let nonThemeFound = 0; // every 3 non-theme correct words = 1 hint
-let hints = 0;
 let hintUsed = [];
 
-const grid = document.getElementById('strands-grid');
-grid.style.gridTemplateColumns = `repeat(${COLS}, 52px)`;
+// Create an isolated confetti instance using the optimized stylesheet wrapper
+const confettiCanvas = document.createElement('canvas');
+confettiCanvas.className = 'safe-confetti-canvas';
+document.body.appendChild(confettiCanvas);
+const customConfetti = confetti.create(confettiCanvas, { resize: true });
 
-// Build path lookup
-const pathLookup = {};
-WORDS.forEach((w, wi) => {
-  const key = WORD_PATHS[wi].map(([r,c]) => `${r},${c}`).join('|');
-  pathLookup[wi] = new Set(WORD_PATHS[wi].map(([r,c]) => `${r},${c}`));
-});
+const grid = document.getElementById('strands-grid');
+grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
 
 // Render cells
 for (let r = 0; r < ROWS; r++) {
@@ -211,16 +124,23 @@ for (let r = 0; r < ROWS; r++) {
 grid.addEventListener('pointerdown', e => {
   const cell = e.target.closest('.s-cell');
   if (!cell) return;
+  if (cell.classList.contains('found-word') || cell.classList.contains('spangram')) return;
+  
   selecting = true;
   currentPath = [];
   grid.setPointerCapture(e.pointerId);
   addToPath(cell);
 });
+
 grid.addEventListener('pointermove', e => {
   if (!selecting) return;
   const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest?.('.s-cell');
-  if (cell && isAdjacent(cell)) addToPath(cell);
+  if (cell && isAdjacent(cell)) {
+    if (cell.classList.contains('found-word') || cell.classList.contains('spangram')) return;
+    addToPath(cell);
+  }
 });
+
 grid.addEventListener('pointerup', () => {
   if (selecting) { selecting = false; checkWord(); }
 });
@@ -240,6 +160,67 @@ function isAdjacent(cell) {
   return dr <= 1 && dc <= 1 && !(dr === 0 && dc === 0);
 }
 
+function triggerWordConfetti(isSpangram) {
+  if (isSpangram) {
+    var duration = 2 * 1000;
+    var end = Date.now() + duration;
+
+    (function frame() {
+      customConfetti({
+        particleCount: 4,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.8 },
+        colors: ['#f4c430', '#ffffff', '#ffbb00']
+      });
+      customConfetti({
+        particleCount: 4,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.8 },
+        colors: ['#f4c430', '#ffffff', '#ffbb00']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    }());
+  } else {
+    customConfetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.75 },
+      colors: ['#7fa9df', '#ffffff', '#b3d1ff']
+    });
+  }
+}
+
+function triggerWinConfetti() {
+  var end = Date.now() + (4 * 1000);
+  var colors = ['#7fa9df', '#f4c430', '#ffffff', '#ff69b4'];
+
+  (function frame() {
+    customConfetti({
+      particleCount: 3,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: colors
+    });
+    customConfetti({
+      particleCount: 3,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: colors
+    });
+
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  }());
+}
+
 function checkWord() {
   const pathKey = currentPath.map(id => {
     const el = document.getElementById(id);
@@ -250,7 +231,6 @@ function checkWord() {
   WORDS.forEach((w, wi) => {
     if (foundWords.has(wi)) return;
     const expectedKey = WORD_PATHS[wi].map(([r,c]) => `${r},${c}`).join('|');
-    // Check forward and reverse
     const rev = [...WORD_PATHS[wi]].reverse().map(([r,c]) => `${r},${c}`).join('|');
     if (pathKey === expectedKey || pathKey === rev) matched = wi;
   });
@@ -259,16 +239,24 @@ function checkWord() {
     const w = WORDS[matched];
     foundWords.add(matched);
     const cssClass = w.spangram ? 'spangram' : 'found-word';
+    
     currentPath.forEach(id => {
       const el = document.getElementById(id);
-      el.classList.remove('selecting');
+      el.classList.remove('selecting', 'found-theme');
       el.classList.add(cssClass);
     });
     addFoundTag(w.word, w.spangram);
-    nonThemeFound++;
-    if (nonThemeFound % 3 === 0) { hints++; updateHintCount(); showToast('You earned a hint!'); }
+	
+	const counterEl = document.getElementById('word-counter');
+    counterEl.textContent = `${foundWords.size} of ${WORDS.length} theme words found.`;
+    
+    triggerWordConfetti(w.spangram);
+    
     if (foundWords.size === WORDS.length) {
-      setTimeout(() => showModal('🌟 All found!', "You found every word — you know yourself so well! 🎂"), 300);
+      setTimeout(() => {
+        triggerWinConfetti();
+        showModal('🌟 Happy Birthday!', "You found every word perfectly! You truly are obsessed! and this is one of the million qualities I love about you 🎂");
+      }, 500);
     }
   } else {
     clearSelecting();
@@ -276,7 +264,10 @@ function checkWord() {
 }
 
 function clearSelecting() {
-  currentPath.forEach(id => document.getElementById(id)?.classList.remove('selecting'));
+  currentPath.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('selecting');
+  });
   currentPath = [];
 }
 
@@ -288,29 +279,15 @@ function addFoundTag(word, isSpangram) {
   el.appendChild(tag);
 }
 
-function updateHintCount() {
-  document.getElementById('hint-count').textContent = hints;
-}
-
 function useHint() {
-  if (hints <= 0) { showToast('No hints yet — keep finding words!'); return; }
-  // Reveal a letter from the next unsolved word
-  const wi = WORDS.findIndex((w, i) => !foundWords.has(i) && !hintUsed.includes(i));
-  if (wi === -1) { showToast('Nothing left to hint!'); return; }
-  const path = WORD_PATHS[wi];
-  const [r, c] = path[0];
-  const cell = document.getElementById(`sc-${r}-${c}`);
-  cell.classList.add('found-theme');
-  hints--;
-  hintUsed.push(wi);
-  updateHintCount();
+  showModal('💡 Need a Clue?', "Call Tanmey and ask him nicely for help! 📞");
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1800);
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
 
 function showModal(title, body) {

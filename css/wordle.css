@@ -1,0 +1,108 @@
+/* ── Wordle Board & Tiles ────────────────────────────── */
+.board { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
+}
+
+.board-row { 
+  display: flex; 
+  gap: 6px; 
+}
+
+.tile {
+  width: 58px; 
+  height: 58px;
+  border: 2px solid var(--warm);
+  border-radius: 4px;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-family: var(--ff-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--dark);
+  background: #fff;
+  user-select: none;
+  transition: border-color 0.1s;
+}
+
+.tile.filled { 
+  border-color: var(--mid); 
+}
+
+/* Explicit tile states with high specificity overrides */
+.tile.correct { 
+  background: var(--green) !important;  
+  color: #fff !important; 
+  border-color: transparent !important; 
+}
+
+.tile.present { 
+  background: var(--yellow) !important; 
+  color: #fff !important; 
+  border-color: transparent !important; 
+}
+
+.tile.absent { 
+  background: var(--mid) !important;    
+  color: #fff !important; 
+  border-color: transparent !important; 
+}
+
+/* ── Hint Box ────────────────────────────────────────── */
+.hint-box {
+  text-align: center;
+  max-width: 340px;
+  background: #fff;
+  border: 1.5px solid var(--warm);
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 0.85rem;
+  color: var(--mid);
+  line-height: 1.5;
+}
+
+.hint-box strong { 
+  color: var(--rust); 
+  font-style: italic; 
+}
+
+/* ── Animations ──────────────────────────────────────── */
+@keyframes pop {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.12); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%     { transform: translateX(-6px); }
+  40%     { transform: translateX(6px); }
+  60%     { transform: translateX(-4px); }
+  80%     { transform: translateX(4px); }
+}
+
+@keyframes flipOut {
+  from { transform: rotateX(0deg); }
+  to   { transform: rotateX(-90deg); }
+}
+
+@keyframes flipIn {
+  from { transform: rotateX(90deg); }
+  to   { transform: rotateX(0deg); }
+}
+
+.tile.pop      { animation: pop 0.1s ease; }
+.tile.shake    { animation: shake 0.4s ease; }
+.tile.flip-out { animation: flipOut 0.15s ease forwards; }
+.tile.flip-in  { animation: flipIn 0.15s ease forwards; }
+
+/* ── Responsive adjustments ─────────────────────────── */
+@media (max-width: 400px) {
+  .tile { 
+    width: 48px; 
+    height: 48px; 
+    font-size: 1.4rem; 
+  }
+}

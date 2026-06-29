@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connections – Birthday Games</title>
+  <title>Connections | Aayushi's Birthday Edition 🎂</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css" />
@@ -128,13 +128,13 @@
 
   <header class="game-header">
     <a href="../index.html" class="back-link">← Back</a>
-    <h1>Connections</h1>
+    <h1>Connections #1305</h1>
     <div style="width:48px"></div>
   </header>
 
   <div class="game-body">
-    <p class="instructions">Find four groups of four. Select four words, then hit Submit.</p>
-    <p>This is about the people in your different circles.</p>
+    <p class="instructions">Create four groups of four!</p>
+    <p>Theme: People from different social circles.</p>
 
     <div class="lives" id="lives"></div>
     <div class="solved-list" id="solved"></div>
@@ -293,7 +293,7 @@ function submitGuess() {
     renderGrid();
     if (solved.length === CATEGORIES.length) {
       gameOver = true;
-      setTimeout(() => showModal('🎉 You nailed it!', "You know yourself better than anyone 😄. Hope you had fun"), 400);
+      setTimeout(() => showModal('🎉 You nailed it!', "You rule this game. Hope you had fun"), 400);
     }
   } else {
     // Wrong
@@ -308,7 +308,7 @@ function submitGuess() {
       gameOver = true;
       setTimeout(() => {
         const reveal = CATEGORIES.map(c => `${c.name}: ${c.words.join(', ')}`).join('\n');
-        showModal('Out of guesses 💛', `Here were the groups:\n${reveal}`);
+        showModal('Out of guesses 💛, I had made it slightly difficult', `Here were the groups:\n${reveal}`);
       }, 600);
     }
   }
