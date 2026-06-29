@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Us 🌙</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/index.css" />
+
+  <style>
+    /* Vibrant, Celestial Makeover */
+    body {
+      background: radial-gradient(circle at 50% 0%, #1a102f 0%, #0c0714 100%) !important;
+      color: #f7f3ed !important;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Subtle twinkling star accents */
+    body::before {
+      content: '✦  .  ✨  .  ✦  .  ✨';
+      position: absolute;
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      letter-spacing: 2rem;
+      font-size: 0.9rem;
+      opacity: 0.3;
+      color: #fff;
+      pointer-events: none;
+    }
+
+    .game-container {
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 0 24px;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 32px;
+      font-size: 0.9rem;
+      color: #e8896a; 
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.15s;
+    }
+    .back-btn:hover {
+      transform: translateX(-4px);
+      color: #ffd269;
+    }
+
+    .progress-track {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #b89880;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    /* Vibrant, Sunny Focal Card (Shared Styles) */
+    .flash-card {
+      background: #ffd269; 
+      color: #1a102f; 
+      border-radius: 24px;
+      padding: 48px 32px;
+      box-shadow: 0 0 40px rgba(255, 210, 105, 0.25), 0 12px 32px rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      margin-bottom: 24px;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s ease;
+      position: relative;
+    }
+
+    .card-icon {
+      font-size: 2.2rem;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .card-title {
+      font-family: var(--ff-display);
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .card-date {
+      font-family: var(--ff-display);
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+      text-shadow: 0 2px 4px rgba(26, 16, 47, 0.08);
+    }
+
+    .card-prompt {
+      font-family: var(--ff-body);
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.8;
+      margin-bottom: 28px;
+    }
+
+    /* Rules List Custom Styling */
+    .rules-list {
+      text-align: left;
+      margin: 8px 0 28px 0;
+      font-family: var(--ff-body);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      list-style-type: none;
+    }
+    
+    .rules-list li {
+      margin-bottom: 10px;
+      position: relative;
+      padding-left: 24px;
+    }
+
+    .rules-list li::before {
+      content: "✨";
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    /* Deep Cosmic Contrast Buttons */
+    .action-btn {
+      background: #1a102f;
+      color: #ffd269; 
+      border: 2px solid #ffd269;
+      padding: 14px 32px;
+      font-family: var(--ff-body);
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-2px);
+      background: #ffd269;
+      color: #1a102f;
+      border-color: #1a102f;
+    }
+
+    /* Answer Display Container */
+    .answer-box {
+      margin-top: 24px;
+      font-size: 1.2rem;
+      font-family: var(--ff-display);
+      font-style: italic;
+      color: #1a102f;
+      font-weight: 700;
+      min-height: 40px;
+      line-height: 1.6;
+      max-width: 90%;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      border-top: 1.5px dashed rgba(26, 16, 47, 0.2);
+      padding-top: 16px;
+    }
+    .answer-box.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Utility to swap views */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <a href="../index.html" class="back-btn">← Back to Game Board</a>
+    
+    <div id="rulesScreen">
+      <div class="progress-track">Before You Play</div>
+      <div class="flash-card">
+        <div class="card-icon">🌙</div>
+        <div class="card-title">About this game</div>
+        
+        <ul class="rules-list">
+          <li>You might have noticed that each game has a specific number.</li>
+		  <li>That is not a random number; it is a date that signifies something.</li>
+		  <li>Each date signifies an important milestone for us (or at least for me).</li>
+		  <li>So if you are interested in Easter eggs, click on "Start Game."</li>
+		  <li>Otherwise, click on "Back to the game board."</li>
+
+        </ul>
+        
+        <button class="action-btn" onclick="startGame()">Start Game →</button>
+      </div>
+    </div>
+
+    <div id="gameplayScreen" class="hidden">
+      <div class="progress-track" id="progressText">Question 1 of 5</div>
+
+      <div class="flash-card">
+        <div class="card-icon">🌙✨</div>
+        <div class="card-date" id="targetDate">04-12-2024</div>
+        <div class="card-prompt">What does this date signify?</div>
+        
+        <button class="action-btn" id="actionButton" onclick="handleButtonClick()">Reveal Answer</button>
+        
+        <div class="answer-box" id="answerBox">
+          This is the day day you joined Optum! I think some days you might Question your decision to join this company, given itna irritate karta hu 😜
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Quiz core data
+    const quizData = [
+      { date: "24-03-2025", answer: "This is the day we met for the first time in person. I know we didn't really talk too much back then. To be honest, I never imagined that day how important you would become to me. But just like in Wordle, with time we would figure out place in each other's life " },
+      { date: "13-05-2025", answer: "This is the day you first texted me on WhatsApp. Since that day, our Connection has only grown stronger." },
+      { date: "25-06-2025", answer: "This is the day I first confessed to having feelings for you, making our friendship as complicated as Strands." },
+      { date: "17-04-2026", answer: "This is the day we finally got to spend time together in person, and I can easily pinpoint it as my absolute favorite memory." }
+    ];
+
+    let currentIndex = 0;
+    let isRevealed = false;
+
+    // View Switching Elements
+    const rulesScreen = document.getElementById('rulesScreen');
+    const gameplayScreen = document.getElementById('gameplayScreen');
+
+    // Gameplay UI Elements
+    const progressText = document.getElementById('progressText');
+    const targetDate = document.getElementById('targetDate');
+    const actionButton = document.getElementById('actionButton');
+    const answerBox = document.getElementById('answerBox');
+
+    // Transitions from Rules View to Quiz View
+    function startGame() {
+      rulesScreen.classList.add('hidden');
+      gameplayScreen.classList.remove('hidden');
+    }
+
+    // Handles the interactive step mechanics
+    function handleButtonClick() {
+      if (!isRevealed) {
+        answerBox.classList.add('visible');
+        if (currentIndex < quizData.length - 1) {
+          actionButton.innerText = "Next Question →";
+        } else {
+          actionButton.innerText = "Finish Game 🌻";
+        }
+        isRevealed = true;
+      } else {
+        if (currentIndex < quizData.length - 1) {
+          currentIndex++;
+          isRevealed = false;
+          
+          answerBox.classList.remove('visible');
+          setTimeout(() => {
+            progressText.innerText = `Question ${currentIndex + 1} of ${quizData.length}`;
+            targetDate.innerText = quizData[currentIndex].date;
+            answerBox.innerText = quizData[currentIndex].answer;
+            actionButton.innerText = "Reveal Answer";
+          }, 200);
+        } else {
+          alert("Happy Birthday once again, thanking you for existing and making my life better 🌻🌻");
+          window.location.href = "../index.html";
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
