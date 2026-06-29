@@ -8,47 +8,71 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <style>
-    /* Game-specific layout adjustments */
+										  
     .pinpoint-container {
       width: 100%;
       max-width: 480px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
-    .clues-box {
+    
+    /* Pinpoint Grid Style */
+    .pinpoint-grid {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
+    }
+    
+    .clue-tile {
       background: #fff;
       border: 1.5px solid var(--warm);
-      border-radius: 12px;
-      padding: 20px;
-      min-height: 240px;
+      border-radius: 10px;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
       justify-content: center;
-    }
-    .clue {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--dark);
+      padding: 12px 16px;
+		   
+						 
+					   
+						 
       text-align: center;
-      padding: 8px;
-      border-bottom: 1px dashed var(--warm);
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s ease;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+								  
+								
     }
-    .clue.revealed {
-      opacity: 1;
-      transform: translateY(0);
+
+    /* Unrevealed tile looks like an empty mystery slot */
+    .clue-tile.locked {
+      background: var(--warm);
+      color: var(--mid);
+      border-style: dashed;
+      font-family: var(--ff-display);
+      font-size: 1.1rem;
+      opacity: 0.6;
     }
-    .clue:last-child {
-      border-bottom: none;
+
+    /* Animation pop when revealed */
+    .clue-tile.revealed {
+      animation: popIn 0.35s ease-out forwards;
+      color: var(--dark);
+      border-color: var(--rust-lt);
+      box-shadow: 0 4px 12px rgba(44,26,14,0.05);
     }
+
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
     .game-controls {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      margin-top: 8px;
     }
     .input-group {
       display: flex;
@@ -81,17 +105,24 @@
   <header class="game-header">
     <a href="../index.html" class="back-link">← Back</a>
     <h1>Pinpoint</h1>
-    <div style="width: 45px;"></div> </header>
+    <div style="width: 45px;"></div>
+  </header>
 
   <main class="game-body">
     <div class="pinpoint-container">
       
       <div class="guess-counter" id="guess-counter">
-        Clue 1 of 5
+        Clues Revealed: 1 / 5
       </div>
 
-      <div class="clues-box" id="clues-box">
-        </div>
+      <!-- The 5 Visual Tiles -->
+      <div class="pinpoint-grid" id="pinpoint-grid">
+        <div class="clue-tile locked" id="tile-0">?</div>
+        <div class="clue-tile locked" id="tile-1">?</div>
+        <div class="clue-tile locked" id="tile-2">?</div>
+        <div class="clue-tile locked" id="tile-3">?</div>
+        <div class="clue-tile locked" id="tile-4">?</div>
+      </div>
 
       <div class="game-controls">
         <div class="input-group">
@@ -104,21 +135,31 @@
     </div>
   </main>
 
+  <!-- Notification Toast -->
   <div class="toast" id="toast">Incorrect guess! Try again.</div>
 
+  <!-- End Game Overlay -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
-      <h2 id="modal-title">You Nailed It! 🎉</h2>
-      <p id="modal-desc">See, told you! Refresh matching strategy didn't save you here.</p>
+      <h2 id="modal-title">Result</h2>
+      <p id="modal-desc"></p>
       <button class="btn" onclick="location.reload()">Play Again</button>
     </div>
   </div>
 
   <script>
-    // --- CUSTOMIZABLE GAME DATA ---
-    // You can swap these out with inside jokes/references tailored to Aayushi
+    // --- CONFIGURE YOUR QUESTIONS & VALID ANSWERS HERE ---
+																			  
     const gameData = {
-      secretAnswer: "People jisne baat karne ke liye tanmey ka phone disconnect kiya gya hai", 
+      // The principal long answer to show in descriptions when winning/losing
+      displayAnswer: "People jisne baat karne ke liye tanmey ka phone disconnect kiya gya hai",
+      
+      // All versions she could enter that you want to instantly accept
+      acceptableAnswers: [
+        "Disconnect Tanmey call",
+        "Ignore Tanmey"
+      ],
+      
       clues: [
         "Aastiva",
         "Ashutosh",
@@ -131,7 +172,7 @@
     let currentClueIndex = 0;
     const maxClues = gameData.clues.length;
 
-    const cluesBox = document.getElementById('clues-box');
+														  
     const guessInput = document.getElementById('guess-input');
     const submitBtn = document.getElementById('submit-btn');
     const nextClueBtn = document.getElementById('next-clue-btn');
@@ -141,32 +182,36 @@
     const modalTitle = document.getElementById('modal-title');
     const modalDesc = document.getElementById('modal-desc');
 
-    // Initialize the first clue
+								
     function initGame() {
+      // Reveal first clue immediately
       revealNextClue();
     }
 
     function revealNextClue() {
       if (currentClueIndex < maxClues) {
-        const clueEl = document.createElement('div');
-        clueEl.className = 'clue';
-        clueEl.innerText = gameData.clues[currentClueIndex];
-        cluesBox.appendChild(clueEl);
-        
-        // Triggers the CSS transition smoothly
-        setTimeout(() => clueEl.classList.add('revealed'), 50);
+        const currentTile = document.getElementById(`tile-${currentClueIndex}`);
+        if (currentTile) {
+          currentTile.classList.remove('locked');
+          currentTile.classList.add('revealed');
+          currentTile.innerText = gameData.clues[currentClueIndex];
+        }
+		
+											   
+															   
 
         currentClueIndex++;
         updateCounter();
-        
+
+        // Hide button if no more clues can be explicitly given
         if (currentClueIndex === maxClues) {
-          nextClueBtn.style.display = 'none'; // No more clues left
+          nextClueBtn.style.display = 'none';
         }
       }
     }
 
     function updateCounter() {
-      guessCounter.innerText = `Clue ${currentClueIndex} of ${maxClues}`;
+      guessCounter.innerText = `Clues Revealed: ${currentClueIndex} / ${maxClues}`;
     }
 
     function showToast(message) {
@@ -179,36 +224,39 @@
       const userGuess = guessInput.value.trim().toLowerCase();
       if (!userGuess) return;
 
-      if (userGuess === gameData.secretAnswer.toLowerCase()) {
-        // WINNER!
+      // Check input against list of matches
+      const isCorrect = gameData.acceptableAnswers.some(ans => ans.trim().toLowerCase() === userGuess);
+
+      if (isCorrect) {
         modalTitle.innerText = "You Nailed It! 🎉";
-        modalDesc.innerText = `The answer was indeed "${gameData.secretAnswer}". Look at you figuring it out on clue #${currentClueIndex}! So proud.`;
+        modalDesc.innerText = `Exactly! The answer was "${gameData.displayAnswer}". Caught it on clue ${currentClueIndex}/${maxClues}!`;
         modalOverlay.classList.add('show');
       } else {
-        // WRONG GUESS
+					  
         guessInput.value = '';
+        
         if (currentClueIndex < maxClues) {
-          showToast("Nope! Not that one. Here is another clue...");
+          showToast("Wrong guess! Revealing next clue...");
           revealNextClue();
         } else {
-          // No clues left and guessed wrong
+          // Final guess failure state
           modalTitle.innerText = "So close! 💔";
-          modalDesc.innerText = `Aap toh cheat code use karne wale thhey na? The answer was actually "${gameData.secretAnswer}".`;
+          modalDesc.innerText = `Aap guess nahi kar paaye. Real answer was: "${gameData.displayAnswer}".`;
           modalOverlay.classList.add('show');
         }
       }
     }
 
-    // Event Listeners
+    // Interactive Action Listeners
     submitBtn.addEventListener('click', handleGuess);
-    nextClueBtn.addEventListener('click', () => {
-      revealNextClue();
-    });
+    nextClueBtn.addEventListener('click', revealNextClue);
+					   
+	   
     guessInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') handleGuess();
     });
 
-    // Start game on load
+						 
     initGame();
   </script>
 </body>
