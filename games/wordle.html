@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wordle – Birthday Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    /* ── Wordle-specific overrides ── */
+    .board {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .board-row {
+      display: flex;
+      gap: 6px;
+    }
+    .tile {
+      width: 58px; height: 58px;
+      border: 2px solid var(--warm);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--ff-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--dark);
+      background: #fff;
+      transition: border-color 0.1s;
+      position: relative;
+      user-select: none;
+    }
+    .tile.filled { border-color: var(--mid); }
+    
+    /* Fixed: Force background colors to stay permanently after the flip animation */
+    .tile.correct  { background: var(--green) !important; color: #fff !important; }
+    .tile.present  { background: var(--yellow) !important; color: #fff !important; }
+    .tile.absent   { background: var(--mid) !important; color: #fff !important; }
+
+    .tile.revealed {
+      border-color: transparent !important;
+      animation: flip 0.5s ease forwards;
+    }
+
+    /* Cleaned up keyframes to handle the mid-flip transition naturally */
+    @keyframes flip {
+      0%   { transform: rotateX(0); }
+      45%  { transform: rotateX(90deg); background: #fff; color: var(--dark); }
+      55%  { transform: rotateX(90deg); }
+      100% { transform: rotateX(0); }
+    }
+
+    .tile.pop {
+      animation: pop 0.1s ease;
+    }
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+    .tile.shake {
+      animation: shake 0.4s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-6px); }
+      40%      { transform: translateX(6px); }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(4px); }
+    }
+
+    .hint-box {
+      text-align: center;
+      max-width: 340px;
+      background: #fff;
+      border: 1.5px solid var(--warm);
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      color: var(--mid);
+      line-height: 1.5;
+    }
+    .hint-box strong { color: var(--rust); font-style: italic; }
+
+    @media (max-width: 400px) {
+      .tile { width: 48px; height: 48px; font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="game-shell">
+
+  <header class="game-header">
+    <a href="../index.html" class="back-link">← Back</a>
+    <h1>Wordle</h1>
+    <div style="width:48px"></div>
+  </header>
+
+  <div class="game-body">
+
+    <div class="hint-box">
+      <strong>Today's theme:</strong>
+      [It is someone or something you love, but is not close to you every time.]
+    </div>
+
+    <div class="board" id="board"></div>
+    <div class="keyboard" id="keyboard"></div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">🎉</h2>
+    <p id="modal-body"></p>
+    <button class="btn" onclick="document.getElementById('modal').classList.remove('show')">Close</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  ✏️  EDIT THESE TWO THINGS:
+// ════════════════════════════════════════════════
+
+const ANSWER = "PALAK";            // ← 5-letter word (all caps)
+const WIN_MESSAGE = "After Popeye, you are the second person I know who loves Spinach so much. And this felt like a good word play for Palak. "; // ← shown on win
+
+// ════════════════════════════════════════════════
+//  Game logic
+// ════════════════════════════════════════════════
+
+const ROWS = 6, COLS = 5;
+let currentRow = 0, currentCol = 0;
+let guesses = Array.from({length: ROWS}, () => Array(COLS).fill(''));
+let gameOver = false;
+
+const board = document.getElementById('board');
+const keyMap = {};
+
+// Build board
+for (let r = 0; r < ROWS; r++) {
+  const row = document.createElement('div');
+  row.className = 'board-row';
+  for (let c = 0; c < COLS; c++) {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.id = `tile-${r}-${c}`;
+    row.appendChild(tile);
+  }
+  board.appendChild(row);
+}
+
+// Build keyboard
+const KEYS = [
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L'],
+  ['ENTER','Z','X','C','V','B','N','M','⌫']
+];
+const kb = document.getElementById('keyboard');
+KEYS.forEach(row => {
+  const el = document.createElement('div');
+  el.className = 'keyboard-row';
+  row.forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'key' + (k.length > 1 ? ' wide' : '');
+    btn.textContent = k;
+    btn.dataset.key = k;
+    btn.addEventListener('click', () => handleKey(k));
+    el.appendChild(btn);
+    keyMap[k] = btn;
+  });
+  kb.appendChild(el);
+});
+
+// Input
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.key === 'Enter') handleKey('ENTER');
+  else if (e.key === 'Backspace') handleKey('⌫');
+  else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+});
+
+function handleKey(k) {
+  if (gameOver) return;
+  if (k === '⌫') deleteLetter();
+  else if (k === 'ENTER') submitGuess();
+  else if (/^[A-Z]$/.test(k) && currentCol < COLS) typeLetter(k);
+}
+
+function typeLetter(k) {
+  const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
+  tile.textContent = k;
+  tile.classList.add('filled','pop');
+  setTimeout(() => tile.classList.remove('pop'), 100);
+  guesses[currentRow][currentCol] = k;
+  currentCol++;
+}
+
+function deleteLetter() {
+  if (currentCol === 0) return;
+  currentCol--;
+  const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
+  tile.textContent = '';
+  tile.classList.remove('filled','pop');
+  guesses[currentRow][currentCol] = '';
+}
+
+function submitGuess() {
+  if (currentCol < COLS) { shakeRow(currentRow); showToast("Not enough letters"); return; }
+  const guess = guesses[currentRow].join('');
+  revealRow(currentRow, guess);
+}
+
+function triggerConfetti() {
+  confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0, y: 0.8 } });
+  confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1, y: 0.8 } });
+}
+
+function revealRow(row, guess) {
+  const answer = ANSWER.toUpperCase();
+  const result = Array(COLS).fill('absent');
+  const ansArr = answer.split('');
+  const gArr   = guess.split('');
+  const finalGuessLetters = [...gArr]; // Clean copy to reliably update keyboard keys
+
+  // 1st Pass: Correct positions
+  gArr.forEach((l, i) => { 
+    if (l === ansArr[i]) { 
+      result[i] = 'correct'; 
+      ansArr[i] = null; 
+      gArr[i] = null; 
+    } 
+  });
+
+  // 2nd Pass: Present but wrong positions
+  gArr.forEach((l, i) => {
+    if (!l) return;
+    const j = ansArr.indexOf(l);
+    if (j !== -1) { 
+      result[i] = 'present'; 
+      ansArr[j] = null; 
+    }
+  });
+
+  // Apply visual reveal and update keyboard keys sequentially
+  result.forEach((state, col) => {
+    const tile = document.getElementById(`tile-${row}-${col}`);
+    setTimeout(() => {
+      tile.classList.add('revealed', state);
+      updateKey(finalGuessLetters[col], state);
+    }, col * 200);
+  });
+
+  const delay = (COLS - 1) * 200 + 250;
+  setTimeout(() => {
+    if (guess === answer) {
+      gameOver = true;
+      triggerConfetti();
+      setTimeout(() => showModal('🎉 You got it!', WIN_MESSAGE), 400);
+    } else if (row === ROWS - 1) {
+      gameOver = true;
+      setTimeout(() => showModal('The answer was…', `"${answer}" — better luck next time 🎂`), 400);
+    } else {
+      currentRow++;
+      currentCol = 0;
+    }
+  }, delay);
+}
+
+function updateKey(letter, state) {
+  const btn = keyMap[letter];
+  if (!btn) return;
+  
+  const priority = { correct: 3, present: 2, absent: 1 };
+  
+  const curState = btn.dataset.state || '';
+  const curPriority = priority[curState] || 0;
+  const newPriority = priority[state] || 0;
+  
+  // Protect high priorities (e.g. green keys don't down-grade back to gray or yellow)
+  if (newPriority > curPriority) { 
+    btn.dataset.state = state; 
+    btn.className = `key ${letter.length > 1 ? 'wide' : ''} ${state}`;
+  }
+}
+
+function shakeRow(row) {
+  for (let c = 0; c < COLS; c++) document.getElementById(`tile-${row}-${c}`).classList.add('shake');
+  setTimeout(() => { for (let c = 0; c < COLS; c++) document.getElementById(`tile-${row}-${c}`).classList.remove('shake'); }, 500);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function showModal(title, body) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent  = body;
+  document.getElementById('modal').classList.add('show');
+}
+</script>
+</body>
+</html>
