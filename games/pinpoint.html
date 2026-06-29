@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinpoint | Birthday Edition 🎂</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Game-specific layout adjustments */
+    .pinpoint-container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .clues-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fff;
+      border: 1.5px solid var(--warm);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 240px;
+      justify-content: center;
+    }
+    .clue {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--dark);
+      text-align: center;
+      padding: 8px;
+      border-bottom: 1px dashed var(--warm);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+    .clue.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .clue:last-child {
+      border-bottom: none;
+    }
+    .game-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+    .guess-input {
+      flex: 1;
+      padding: 14px;
+      border: 1.5px solid var(--warm);
+      border-radius: 8px;
+      font-family: var(--ff-body);
+      font-size: 1rem;
+      outline: none;
+    }
+    .guess-input:focus {
+      border-color: var(--rust-lt);
+    }
+    .guess-counter {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--mid);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body class="game-shell">
+
+  <header class="game-header">
+    <a href="../index.html" class="back-link">← Back</a>
+    <h1>Pinpoint</h1>
+    <div style="width: 45px;"></div> </header>
+
+  <main class="game-body">
+    <div class="pinpoint-container">
+      
+      <div class="guess-counter" id="guess-counter">
+        Clue 1 of 5
+      </div>
+
+      <div class="clues-box" id="clues-box">
+        </div>
+
+      <div class="game-controls">
+        <div class="input-group">
+          <input type="text" id="guess-input" class="guess-input" placeholder="Type your guess..." autocomplete="off">
+          <button class="btn" id="submit-btn">Guess</button>
+        </div>
+        <button class="btn" id="next-clue-btn" style="background: var(--mid); padding: 10px;">Give me another clue</button>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Incorrect guess! Try again.</div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h2 id="modal-title">You Nailed It! 🎉</h2>
+      <p id="modal-desc">See, told you! Refresh matching strategy didn't save you here.</p>
+      <button class="btn" onclick="location.reload()">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    // --- CUSTOMIZABLE GAME DATA ---
+    // You can swap these out with inside jokes/references tailored to Aayushi
+    const gameData = {
+      secretAnswer: "People jisne baat karne ke liye tanmey ka phone disconnect kiya gya hai", 
+      clues: [
+        "Aastiva",
+        "Ashutosh",
+        "Pragati",
+        "Rakesh",
+        "Almost everyone at Optum"
+      ]
+    };
+
+    let currentClueIndex = 0;
+    const maxClues = gameData.clues.length;
+
+    const cluesBox = document.getElementById('clues-box');
+    const guessInput = document.getElementById('guess-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const nextClueBtn = document.getElementById('next-clue-btn');
+    const guessCounter = document.getElementById('guess-counter');
+    const toast = document.getElementById('toast');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
+
+    // Initialize the first clue
+    function initGame() {
+      revealNextClue();
+    }
+
+    function revealNextClue() {
+      if (currentClueIndex < maxClues) {
+        const clueEl = document.createElement('div');
+        clueEl.className = 'clue';
+        clueEl.innerText = gameData.clues[currentClueIndex];
+        cluesBox.appendChild(clueEl);
+        
+        // Triggers the CSS transition smoothly
+        setTimeout(() => clueEl.classList.add('revealed'), 50);
+
+        currentClueIndex++;
+        updateCounter();
+        
+        if (currentClueIndex === maxClues) {
+          nextClueBtn.style.display = 'none'; // No more clues left
+        }
+      }
+    }
+
+    function updateCounter() {
+      guessCounter.innerText = `Clue ${currentClueIndex} of ${maxClues}`;
+    }
+
+    function showToast(message) {
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function handleGuess() {
+      const userGuess = guessInput.value.trim().toLowerCase();
+      if (!userGuess) return;
+
+      if (userGuess === gameData.secretAnswer.toLowerCase()) {
+        // WINNER!
+        modalTitle.innerText = "You Nailed It! 🎉";
+        modalDesc.innerText = `The answer was indeed "${gameData.secretAnswer}". Look at you figuring it out on clue #${currentClueIndex}! So proud.`;
+        modalOverlay.classList.add('show');
+      } else {
+        // WRONG GUESS
+        guessInput.value = '';
+        if (currentClueIndex < maxClues) {
+          showToast("Nope! Not that one. Here is another clue...");
+          revealNextClue();
+        } else {
+          // No clues left and guessed wrong
+          modalTitle.innerText = "So close! 💔";
+          modalDesc.innerText = `Aap toh cheat code use karne wale thhey na? The answer was actually "${gameData.secretAnswer}".`;
+          modalOverlay.classList.add('show');
+        }
+      }
+    }
+
+    // Event Listeners
+    submitBtn.addEventListener('click', handleGuess);
+    nextClueBtn.addEventListener('click', () => {
+      revealNextClue();
+    });
+    guessInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleGuess();
+    });
+
+    // Start game on load
+    initGame();
+  </script>
+</body>
+</html>
