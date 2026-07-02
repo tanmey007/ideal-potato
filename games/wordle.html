@@ -22,7 +22,7 @@
 
   <div class="game-body">
     <div class="hint-box">
-      <strong>Today's theme:</strong>
+      <strong>Hint:</strong>
       [It is someone or something you love, but is not close to you every time.]
     </div>
     <div class="board" id="board"></div>
@@ -134,10 +134,6 @@ function revealRow(row, guess) {
   const result = Array(COLS).fill('absent');
   const letters = guess.split('');
 
-  // Simpler matching strategy:
-  // 1. If it matches the exact spot -> Green (correct)
-  // 2. If it is in the word anywhere else -> Yellow (present)
-  // 3. Otherwise -> Brown (absent)
   letters.forEach((l, i) => {
     if (l === answer[i]) {
       result[i] = 'correct';
@@ -176,6 +172,10 @@ function revealRow(row, guess) {
       gameOver = true;
       setTimeout(() => showModal('The answer was…', `"${answer}." "  ${WIN_MESSAGE}" `), 300);
     } else {
+      // Check if she just failed her 3rd attempt (row index 2)
+      if (row === 2) {
+        showModal('💡 Think Personal...', "What all you have told me about yourself and Tanmey ko kya yaad rahega? P.S sab kuch");
+      }
       currentRow++;
       currentCol = 0;
     }
@@ -222,5 +222,6 @@ function showModal(title, body) {
   document.getElementById('modal').classList.add('show');
 }
 </script>
+
 </body>
 </html>

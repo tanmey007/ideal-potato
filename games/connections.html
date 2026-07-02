@@ -159,6 +159,7 @@
   </div>
 </div>
 
+
 <script>
 // ════════════════════════════════════════════════
 //  ✏️  EDIT THE CATEGORIES BELOW
@@ -207,6 +208,7 @@ let selected = [];
 let remaining = [];
 let solved = [];
 let gameOver = false;
+let onModalCloseCallback = null; // Tracks what to do when modal closes
 
 // Flatten words with category index
 CATEGORIES.forEach((cat, ci) => cat.words.forEach(w => remaining.push({ word: w, catIndex: ci })));
@@ -214,6 +216,21 @@ shuffle(remaining);
 
 renderLives();
 renderGrid();
+
+// Intercept the original close action directly on the window load to guarantee it works!
+window.addEventListener('DOMContentLoaded', () => {
+  const modalBtn = document.querySelector('.modal .btn');
+  if (modalBtn) {
+    modalBtn.removeAttribute('onclick');
+    modalBtn.addEventListener('click', () => {
+      document.getElementById('modal').classList.remove('show');
+      if (onModalCloseCallback) {
+        onModalCloseCallback();
+        onModalCloseCallback = null; // Reset
+      }
+    });
+  }
+});
 
 function triggerConfetti() {
   // Left side burst
@@ -284,7 +301,7 @@ function submitGuess() {
 
   if (topCount === 4) {
     // Correct!
-    triggerConfetti(); // Added confetti trigger here
+    triggerConfetti(); 
     const cat = CATEGORIES[topCat];
     remaining = remaining.filter(r => !selected.includes(r.word));
     solved.push(cat);
@@ -293,7 +310,7 @@ function submitGuess() {
     renderGrid();
     if (solved.length === CATEGORIES.length) {
       gameOver = true;
-      setTimeout(() => showModal('🎉 You nailed it!', "You rule this game. Hope you had fun"), 400);
+      setTimeout(() => showModal('🎉 You nailed it!', "You rule this game and our hearts"), 400);
     }
   } else {
     // Wrong
@@ -304,14 +321,38 @@ function submitGuess() {
     shakeSelected();
     selected = [];
     setTimeout(renderGrid, 500);
+    
     if (lives === 0) {
       gameOver = true;
+      // Show the modal first, then hand over the auto-solve function to execute on close
       setTimeout(() => {
-        const reveal = CATEGORIES.map(c => `${c.name}: ${c.words.join(', ')}`).join('\n');
-        showModal('Out of guesses 💛, I had made it slightly difficult', `Here were the groups:\n${reveal}`);
+        showModal(
+          'Out of guesses 💛', 
+          'I had made it slightly difficult and I think you would have fallen for the Harsimran trap!',
+          revealRemainingCategories
+        );
       }, 600);
     }
   }
+}
+
+function revealRemainingCategories() {
+  const unsolved = CATEGORIES.filter(cat => !solved.includes(cat));
+  
+  function revealNext(index) {
+    if (index >= unsolved.length) return;
+    
+    const cat = unsolved[index];
+    remaining = remaining.filter(r => r.catIndex !== CATEGORIES.indexOf(cat));
+    solved.push(cat);
+    
+    renderSolved();
+    renderGrid();
+    
+    setTimeout(() => revealNext(index + 1), 1000);
+  }
+  
+  revealNext(0);
 }
 
 function shakeSelected() {
@@ -350,11 +391,14 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-function showModal(title, body) {
+function showModal(title, body, onCloseCallback = null) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').textContent  = body;
   document.getElementById('modal').classList.add('show');
+  onModalCloseCallback = onCloseCallback;
 }
 </script>
+
+
 </body>
 </html>

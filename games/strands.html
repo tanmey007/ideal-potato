@@ -54,7 +54,7 @@
 <script>
 const GRID = [
   ['P','L','U','S','H','I','E','S'], // Row 0: PLUSHIES (Straight across)
-  ['T','A','N','U','J','A','V','I'], // Row 1: TANUJA + VIRDAS start
+  ['C','O','F','F','E','E','V','I'], // Row 1: COFFEE + VIRDAS start
   ['A','S','T','I','T','V','D','R'], // Row 2: ASTITVA + VIRDAS continuation
   ['T','A','Y','L','O','A','A','S'], // Row 3: TAYLO... + ...A (ASTITVA) + ...AS (VIRDAS)
   ['W','O','L','F','R','S','W','I'], // Row 4: SUNFLOWERS left / TAYLORSWIFT right
@@ -63,7 +63,7 @@ const GRID = [
 
 const WORDS = [
   { word: "PLUSHIES",    spangram: false },
-  { word: "TANUJA",      spangram: false },
+  { word: "COFFEE",      spangram: false },
   { word: "VIRDAS",      spangram: false },
   { word: "ASTITVA",     spangram: false },
   { word: "SUNFLOWERS",  spangram: false },
@@ -74,7 +74,7 @@ const WORD_PATHS = [
   // 1. PLUSHIES (8 letters)
   [[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7]],   
 
-  // 2. TANUJA (6 letters)
+  // 2. COFFEE (6 letters)
   [[1,0],[1,1],[1,2],[1,3],[1,4],[1,5]],               
 
   // 3. VIRDAS (6 letters)
@@ -254,7 +254,7 @@ function checkWord() {
     if (foundWords.size === WORDS.length) {
       setTimeout(() => {
         triggerWinConfetti();
-        showModal('🌟 Happy Birthday!', "You found every word perfectly! You truly are obsessed! and this is one of the million qualities I love about you 🎂");
+        showModal('🌟 Happy Birthday!', "You found every word perfectly! You truly are obsessed! and this is one of the million qualities I love about you ❤️❤️❤️");
       }, 500);
     }
   } else {
@@ -294,6 +294,11 @@ function showModal(title, body) {
   document.getElementById('modal-body').textContent  = body;
   document.getElementById('modal').classList.add('show');
 }
+
+
+showModal(
+  "💡 In this game, you don't need to find other words, to get hint, you can press the button use hint anytime. I know I only used to say ki nahi lena hai hint, but ek baar toh button daaba lena puri game me"
+);
 </script>
 </body>
 </html>
